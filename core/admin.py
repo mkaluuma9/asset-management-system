@@ -63,7 +63,7 @@ class AssetAdmin(admin.ModelAdmin):
     search_fields = ['asset_id', 'name', 'assigned_to__username']
     ordering = ['status', 'selling_value']
     list_filter = ['status', 'assigned_to']
-    readonly_fields = ['asset_id', 'profit', 'current_balance']
+    readonly_fields = ['asset_id', 'profit', 'current_balance', 'status']
     inlines = [PaymentInline]
 
     def get_fields(self, request, obj=None):

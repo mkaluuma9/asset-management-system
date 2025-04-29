@@ -1,18 +1,50 @@
-{% extends 'base.html' %}
-{% block title %}User Dashboard{% endblock %}
-{% block content %}
-<h2>Welcome, {{ user.username }}</h2>
-<p>This is your dashboard. You can:</p>
-
-<ul class="list-group">
-    <li class="list-group-item">
-        <a href="{% url 'make_request' %}" class="btn btn-primary">Make Asset Request</a>
-    </li>
-    <li class="list-group-item">
-        <a href="{% url 'view_assets' %}" class="btn btn-secondary">View Assigned Assets</a>
-    </li>
-    <li class="list-group-item">
-        <a href="{% url 'make_payment' %}" class="btn btn-success">Make a Payment</a>
-    </li>
-</ul>
-{% endblock %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <!-- Add Bootstrap for styling -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .card-deck {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center">Admin Dashboard</h1>
+        <div class="card-deck">
+            <div class="card text-white bg-primary">
+                <div class="card-body">
+                    <h5 class="card-title">Countries</h5>
+                    <p class="card-text">{{ num_countries }}</p>
+                    <a href="{% url 'country_list' %}" class="btn btn-light">View</a>
+                </div>
+            </div>
+            <div class="card text-white bg-success">
+                <div class="card-body">
+                    <h5 class="card-title">Regions</h5>
+                    <p class="card-text">{{ num_regions }}</p>
+                    <a href="{% url 'region_list' %}" class="btn btn-light">View</a>
+                </div>
+            </div>
+            <div class="card text-white bg-warning">
+                <div class="card-body">
+                    <h5 class="card-title">Assets</h5>
+                    <p class="card-text">{{ num_assets }}</p>
+                    <a href="{% url 'asset_list' %}" class="btn btn-light">View</a>
+                </div>
+            </div>
+            <div class="card text-white bg-info">
+                <div class="card-body">
+                    <h5 class="card-title">Payments</h5>
+                    <p class="card-text">{{ num_payments }}</p>
+                    <a href="{% url 'payment_list' %}" class="btn btn-light">View</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

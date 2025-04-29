@@ -4,6 +4,7 @@ from smart_selects.db_fields import ChainedForeignKey
 from decimal import Decimal
 from django.core.exceptions import ValidationError
 
+
 # Custom User Model
 class User(AbstractUser):
     ROLE_CHOICES = [
@@ -124,11 +125,12 @@ class Asset(models.Model):
         if self._state.adding and self.selling_value:
             self.current_balance = self.selling_value
 
-        # Automatically update status based on assigned_to
-        if self.assigned_to:
-            self.status = 'assigned'
-        else:
-            self.status = 'unassigned'
+        # Automatically update status based on assigned_to if not explicitly set
+        if self.status != 'paid':  # Don't overwrite 'paid' status
+            if self.assigned_to:
+                self.status = 'assigned'
+            else:
+                self.status = 'unassigned'
 
         super().save(*args, **kwargs)
 
@@ -139,10 +141,6 @@ class Asset(models.Model):
     def __str__(self):
         return f"{self.type} - {self.asset_id} - {self.name}"
 
-
-
-
-# Payment Model
 class Payment(models.Model):
     asset = models.ForeignKey(Asset, on_delete=models.CASCADE)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
@@ -152,6 +150,7 @@ class Payment(models.Model):
     is_deleted = models.BooleanField(default=False)
 
     def clean(self):
+        # Validate that the payment amount doesn't exceed the current balance of the asset
         if self.asset and self.amount > self.asset.current_balance:
             raise ValidationError(f"Payment exceeds remaining balance of {self.asset.current_balance}.")
 
@@ -161,16 +160,31 @@ class Payment(models.Model):
         asset = self.asset
         asset.current_balance -= self.amount
 
+        # If the balance is fully paid off (i.e., <= 0), update the status to 'paid'
         if round(asset.current_balance, 2) <= 0:
             asset.current_balance = Decimal("0.00")
-            asset.status = 'paid'
+            asset.status = 'paid'  # Change status to 'paid'
 
+        # If the asset is still assigned, the status remains 'assigned', no need to change it
+        elif asset.assigned_to is not None and asset.current_balance > 0:
+            asset.status = 'assigned'
+
+        # If there's no assignment and balance is > 0, status remains 'unassigned'
+        elif asset.assigned_to is None and asset.current_balance > 0:
+            asset.status = 'unassigned'
+
+        # Save the asset with the updated balance and status
         asset.save()
+
+        # Save the payment record
         super().save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
+        # Soft delete by setting is_deleted to True
         self.is_deleted = True
         self.save()
 
     def __str__(self):
         return f"Payment of {self.amount} for {self.asset.asset_id} on {self.payment_date}"
+
+

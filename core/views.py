@@ -17,6 +17,7 @@ def dashboard(request):
     return render(request, template, {'user': request.user})
 
 
+
 def make_asset_request(request):
     return render(request, 'make_request.html')
 
@@ -25,3 +26,4 @@ def view_assigned_assets(request):
 
 def make_payment(request):
     return render(request, 'make_payment.html')
+
